@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Caro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Lora', serif; 
+            background: linear-gradient(135deg, #fff0f5 0%, #ffcce0 100%);
+            color: #4a4a4a; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+
+        .container {
+            max-width: 700px; 
+            width: 90%; 
+            margin: 40px auto; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(214, 51, 132, 0.15); 
+            border: 1px solid #ffb3c6;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title-love { 
+            font-family: 'Dancing Script', cursive;
+            font-size: 4.5rem; 
+            color: #d63384; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+            text-shadow: 2px 2px 5px rgba(214, 51, 132, 0.2); 
+            animation: pulse 2s infinite;
+        }
+
+        .subtitle {
+            font-size: 1.1rem; 
+            color: #7a5c61;
+            font-style: italic;
+            margin-bottom: 30px;
+            background: #fff0f5;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px dashed #ffb3c6;
+        }
+
+        /* Cajas de Niveles */
+        .level-box {
+            background: #fff;
+            border: 2px solid #ffe6ea;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .level-box.locked { border-color: #ccc; background: #fdfdfd; }
+        .level-box.unlocked { border-color: #ffb3c6; box-shadow: 0 5px 15px rgba(214, 51, 132, 0.15); }
+
+        .locked-view { display: flex; flex-direction: column; align-items: center; }
+        .unlocked-view { display: none; text-align: center; font-size: 1.15rem; line-height: 1.8; color: #333; }
+        
+        .level-box.unlocked .locked-view { display: none; }
+        .level-box.unlocked .unlocked-view { display: block; animation: fadeIn 1s ease-in; }
+
+        .padlock-title { font-size: 1.5rem; color: #888; font-weight: bold; margin-bottom: 5px; }
+
+        /* Retos */
+        .reto-text {
+            font-size: 1.1rem; color: #d63384; background: #ffe6ea;
+            padding: 10px 15px; border-radius: 10px; margin-bottom: 15px;
+            font-weight: bold; width: 90%; border: 1px dashed #ffb3c6; transition: all 0.5s ease;
+        }
+
+        /* Poemas y Frases */
+        .poem {
+            font-family: 'Dancing Script', cursive; font-size: 2rem; color: #d63384;
+            text-align: center; margin-bottom: 15px; line-height: 1.4; text-shadow: 1px 1px 2px rgba(214, 51, 132, 0.1);
+        }
+        .poem-divider { color: #ffb3c6; font-size: 1.5rem; text-align: center; margin-bottom: 15px; }
+        
+        .frase-amor {
+            font-size: 1.2rem;
+            color: #7a5c61;
+            font-weight: 600;
+            font-style: italic;
+            background: #fff0f5;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #d63384;
+            margin-top: 10px;
+        }
+
+        .key-input {
+            padding: 10px 15px; font-size: 1.1rem; border: 2px solid #ccc;
+            border-radius: 20px; font-family: 'Lora', serif; text-align: center; outline: none;
+            width: 80%; max-width: 250px; text-transform: uppercase; margin-bottom: 15px; display: none; 
+        }
+        .key-input:focus { border-color: #d63384; }
+
+        .key-btn, .btn-action {
+            padding: 12px 28px; background: #d63384; color: white; border: none;
+            border-radius: 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            transition: 0.3s; font-family: 'Lora', serif; display: none;
+        }
+        .key-btn:hover, .btn-action:hover { background: #ff4d6d; transform: scale(1.05); }
+        
+        .level-box.active-lock .key-btn { display: block; }
+        .level-box.active-lock .key-input { border-color: #ffb3c6; display: block; }
+        .level-box.active-lock .padlock-title { color: #d63384; }
+        .level-box.active-lock .reto-text { display: block; }
+        
+        .level-box.locked:not(.active-lock) .reto-text { display: none; }
+        .level-box.locked:not(.active-lock) .padlock-title::after { content: " (Bloqueado)"; font-size: 1rem; color: #aaa; }
+
+        /* Contenedor 100 Razones */
+        #razones-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background: #fffafa;
+            border: 2px solid #ffb3c6;
+            border-radius: 15px;
+            text-align: left;
+            animation: fadeIn 0.8s ease-in;
+        }
+        .razones-scroll {
+            max-height: 280px;
+            overflow-y: scroll;
+            padding-right: 15px;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #555;
+        }
+        .razones-scroll ol {
+            padding-left: 20px;
+            margin: 0;
+        }
+        .razones-scroll li {
+            margin-bottom: 8px;
+        }
+
+        /* Reproductor de Música */
+        #cancion-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            background: #fff0f5;
+            border-radius: 15px;
+            border: 2px dashed #d63384;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        /* Sección de Decisión y Propuesta */
+        .decision-box { 
+            background: #fff; 
+            padding: 25px; 
+            border-radius: 15px; 
+            border: 2px dashed #ffb3c6; 
+            margin-top: 30px; 
+            text-align: center; 
+            display: none;
+            animation: fadeIn 0.8s ease-in;
+        }
+        .decision-box p { font-weight: bold; color: #d63384; font-size: 1.25rem; margin-bottom: 20px; line-height: 1.6; }
+
+        .btn-yes, .btn-no { padding: 12px 25px; margin: 10px; border: none; border-radius: 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: 'Lora', serif; }
+        .btn-yes { background: #d63384; color: white; }
+        .btn-yes:hover { background: #ff4d6d; transform: scale(1.05); box-shadow: 0 5px 15px rgba(214,51,132,0.3); }
+        .btn-no { background: #e0e0e0; color: #555; }
+        .btn-no:hover { background: #ccc; color: #333; }
+
+        #final-key-reveal { display: none; margin-top: 20px; padding: 15px; background: #fff0f5; color: #d63384; font-weight: bold; border-radius: 10px; border: 1px solid #ffb3c6; animation: fadeIn 0.5s ease-in; text-align: justify; }
+
+        .shein-gift { background: #ffe6f2; padding: 25px; border-radius: 15px; border: 2px dashed #d63384; text-align: center; font-weight: bold; color: #d63384; font-size: 1.15rem; box-shadow: 0 10px 20px rgba(214, 51, 132, 0.1); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        @media (max-width: 600px) {
+            .container { padding: 25px 15px; }
+            .title-love { font-size: 3.2rem; }
+            .poem { font-size: 1.6rem; }
+        }
+    
+        .level-date {
+            font-size: 0.95rem;
+            color: #7a5c61;
+            font-weight: bold;
+            margin: 2px 0 14px;
+        }
+
+        .final-link {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 12px 28px;
+            background: #d63384;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .final-link:hover {
+            background: #ff4d6d;
+            transform: scale(1.05);
+        }
+</style>
+</head>
+<body>
+
+    <!-- PANTALLA DE BLOQUEO GLOBAL -->
+    <div id="pantalla-bloqueo" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;width:100vw;position:fixed;top:0;left:0;z-index:9999;background:linear-gradient(135deg,#fff0f5 0%,#ffcce0 100%);">
+        <div id="seccion-clave" style="text-align:center;background:rgba(255,255,255,.9);padding:40px;border-radius:20px;box-shadow:0 10px 20px rgba(214,51,132,.1);border:1px solid #ffb3c6;width:90%;max-width:450px;">
+            <p style="font-size:1.5rem;font-weight:bold;color:#d63384;margin-bottom:20px;font-family:'Lora',serif;">HOLA CARO 👋</p>
+            <p style="font-size:1.1rem;color:#7a5c61;margin-bottom:25px;">
+                Si estás dispuesta a jugar y descubrir una sorpresa... pedime la primera clave. 😏
+            </p>
+            <input type="text" id="clave-ingreso" placeholder="INGRESÁ LA CLAVE ACÁ"
+                style="padding:12px;border-radius:20px;border:2px solid #ffb3c6;text-align:center;text-transform:uppercase;outline:none;margin-bottom:15px;font-family:'Lora',serif;font-size:1.1rem;width:80%;">
+            <br>
+            <button onclick="verificarClaveGlobal()"
+                style="padding:12px 35px;background:#d63384;color:white;border:none;border-radius:25px;font-weight:bold;font-size:1.1rem;cursor:pointer;transition:.3s;font-family:'Lora',serif;">
+                Entrar
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="container" id="contenido-principal" style="display:none;">
+        <div class="title-love">CARO</div>
+
+        <div class="subtitle">
+            Para avanzar y abrir los candados, vas a tener que cumplir el <strong>"reto"</strong> de cada día.
+            Si lo hacés, te doy la clave. Son cuatro días antes de la sorpresa final del 21. ✨
+        </div>
+
+        <div id="levels-container">
+
+            <!-- 17 DE SEPTIEMBRE -->
+            <div class="level-box locked" id="level-0">
+                <div class="locked-view">
+                    <div class="padlock-title">🔒 Día 1</div>
+                    <div class="level-date">17 de septiembre</div>
+                    <div class="reto-text">📌 Reto: Pasarme el TikTok que más te guste o te haya hecho reír hoy.</div>
+                    <input type="text" id="input-0" class="key-input" placeholder="CLAVE DÍA 1">
+                    <button class="key-btn" onclick="tryUnlock(0)">Desbloquear</button>
+                </div>
+                <div class="unlocked-view">
+                    <div class="poem">
+                        Hay personas que llegan sin avisar,<br>
+                        y de a poquito se hacen notar.<br>
+                        Entre una charla, una risa y una canción,<br>
+                        terminan ganándose un lugar en el corazón.
+                    </div>
+                    <div class="poem-divider">❧ ♥ ☙</div>
+                    <div class="frase-amor">
+                        "Caro, esto recién empieza. Quería hacerte algo distinto, algo que te saque una sonrisa cada día."
+                    </div>
+                </div>
+            </div>
+
+            <!-- 18 DE SEPTIEMBRE -->
+            <div class="level-box locked" id="level-1">
+                <div class="locked-view">
+                    <div class="padlock-title">🔒 Día 2</div>
+                    <div class="level-date">18 de septiembre</div>
+                    <div class="reto-text">📌 Reto: Decirme cuál es la canción que tenés pegada en la cabeza últimamente.</div>
+                    <input type="text" id="input-1" class="key-input" placeholder="CLAVE DÍA 2">
+                    <button class="key-btn" onclick="tryUnlock(1)">Desbloquear</button>
+                </div>
+                <div class="unlocked-view">
+                    <div class="poem">
+                        No hace falta un motivo extraordinario,<br>
+                        para volver especial algo cotidiano.<br>
+                        A veces alcanza con saber de vos,<br>
+                        y que una charla nos encuentre a los dos.
+                    </div>
+                    <div class="poem-divider">❧ ♥ ☙</div>
+                    <div class="frase-amor">
+                        "Me gustan esas pequeñas cosas tuyas que voy conociendo, incluso las que para vos parecen una pavada."
+                    </div>
+                </div>
+            </div>
+
+            <!-- 19 DE SEPTIEMBRE -->
+            <div class="level-box locked" id="level-2">
+                <div class="locked-view">
+                    <div class="padlock-title">🔒 Día 3</div>
+                    <div class="level-date">19 de septiembre</div>
+                    <div class="reto-text">📌 Reto: Contarme un chisme jugoso o algo random/gracioso que te haya pasado hoy.</div>
+                    <input type="text" id="input-2" class="key-input" placeholder="CLAVE DÍA 3">
+                    <button class="key-btn" onclick="tryUnlock(2)">Desbloquear</button>
+                </div>
+                <div class="unlocked-view">
+                    <div class="poem">
+                        Entre mensajes que vienen y van,<br>
+                        hay momentos que conmigo se quedan.<br>
+                        Porque hasta una historia simple de tu día,<br>
+                        puede convertirse en mi parte preferida.
+                    </div>
+                    <div class="poem-divider">❧ ♥ ☙</div>
+                    <div class="frase-amor">
+                        "Me encanta cuando me contás tus cosas. Es una forma chiquita de sentirme un poquito más cerca de vos."
+                    </div>
+                </div>
+            </div>
+
+            <!-- 20 DE SEPTIEMBRE -->
+            <div class="level-box locked" id="level-3">
+                <div class="locked-view">
+                    <div class="padlock-title">🔒 Día 4</div>
+                    <div class="level-date">20 de septiembre</div>
+                    <div class="reto-text">📌 Reto: Mandarme un audio contándome qué fue lo mejor de tu día.</div>
+                    <input type="text" id="input-3" class="key-input" placeholder="CLAVE DÍA 4">
+                    <button class="key-btn" onclick="tryUnlock(3)">Desbloquear</button>
+                </div>
+                <div class="unlocked-view">
+                    <div class="poem">
+                        Cuatro días parecen poquito al contar,<br>
+                        pero cada uno tuvo algo para guardar.<br>
+                        Mañana termina este pequeño recorrido,<br>
+                        y vas a descubrir por qué lo había escondido.
+                    </div>
+                    <div class="poem-divider">❧ ♥ ☙</div>
+                    <div class="frase-amor">
+                        "Ya llegaste casi hasta el final. Mañana hay una última clave y detrás de ella está lo que realmente quería mostrarte."
+                    </div>
+                </div>
+            </div>
+
+            <!-- 21 DE SEPTIEMBRE -->
+            <div class="level-box locked" id="level-4">
+                <div class="locked-view">
+                    <div class="padlock-title">🎁 21 de septiembre</div>
+                    <div class="level-date">Sorpresa final</div>
+                    <div class="reto-text">🔑 Reto final: Pedime la última clave por chat.</div>
+                    <input type="text" id="input-4" class="key-input" placeholder="CLAVE FINAL">
+                    <button class="key-btn" onclick="tryUnlock(4)">Desbloquear sorpresa</button>
+                </div>
+                <div class="unlocked-view">
+                    <div class="poem">
+                        Llegaste al final, ya no hay que esperar,<br>
+                        la última puerta se acaba de destrabar.<br>
+                        Gracias por seguir este juego hasta acá,<br>
+                        ahora hay algo más que quiero mostrar.
+                    </div>
+                    <div class="poem-divider">❧ ♥ ☙</div>
+                    <div class="shein-gift">
+                        ¡Llegaste al final, Caro! 🥰<br><br>
+                        La última clave desbloqueó la sorpresa que preparé para vos. 💗<br>
+                        <a class="final-link" href="https://caro018.github.io/Caro/" target="_blank" rel="noopener noreferrer">
+                            💌 ABRIR SORPRESA
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <button onclick="reiniciarPrueba()"
+            style="margin-top:30px;padding:5px 10px;font-size:.8rem;background:#ccc;border:none;cursor:pointer;border-radius:5px;color:#555;">
+            Resetear mi progreso
+        </button>
+    </div>
+
+    <script>
+        let isGlobalUnlocked = localStorage.getItem('caroGlobalUnlock') === 'true';
+        let unlockedLevel = parseInt(localStorage.getItem('caroLevel')) || 0;
+
+        // CAMBIÁ ESTAS CLAVES SI QUERÉS.
+        const CLAVE_INGRESO = "PAPAFRITA";
+        const validKeys = [
+            "SONRISA",   // 17
+            "CARO",      // 18
+            "SECRETO",   // 19
+            "TUVOZ",     // 20
+            "21CARO"     // 21 - abre el enlace final
+        ];
+
+        const FINAL_URL = "https://caro018.github.io/Caro/";
+
+        function iniciarApp() {
+            if (isGlobalUnlocked) {
+                document.getElementById("pantalla-bloqueo").style.display = "none";
+                document.getElementById("contenido-principal").style.display = "block";
+                renderLevels();
+            } else {
+                document.getElementById("pantalla-bloqueo").style.display = "flex";
+                document.getElementById("contenido-principal").style.display = "none";
+            }
+        }
+
+        function verificarClaveGlobal() {
+            const clave = document.getElementById("clave-ingreso").value.trim().toUpperCase();
+
+            if (clave === CLAVE_INGRESO) {
+                isGlobalUnlocked = true;
+                localStorage.setItem('caroGlobalUnlock', 'true');
+                document.getElementById("pantalla-bloqueo").style.display = "none";
+                document.getElementById("contenido-principal").style.display = "block";
+                renderLevels();
+            } else {
+                alert("Mmm... esa no es la clave. ¡Pedímela a mí! 😉");
+            }
+        }
+
+        function renderLevels() {
+            for (let i = 0; i <= 4; i++) {
+                const box = document.getElementById('level-' + i);
+                if (!box) continue;
+
+                box.classList.remove('locked', 'unlocked', 'active-lock');
+
+                if (i < unlockedLevel) {
+                    box.classList.add('unlocked');
+                } else {
+                    box.classList.add('locked');
+                    if (i === unlockedLevel) {
+                        box.classList.add('active-lock');
+                    }
+                }
+            }
+        }
+
+        function tryUnlock(targetLevel) {
+            if (targetLevel > unlockedLevel) {
+                alert("¡Epa! Tenés que desbloquear el día anterior primero. 🔒");
+                return;
+            }
+
+            const inputElement = document.getElementById('input-' + targetLevel);
+            const inputVal = inputElement.value.trim().toUpperCase();
+
+            if (!inputVal) {
+                alert("Escribí la clave en el casillero.");
+                return;
+            }
+
+            if (inputVal === validKeys[targetLevel]) {
+                unlockedLevel++;
+                localStorage.setItem('caroLevel', unlockedLevel);
+                inputElement.value = '';
+                renderLevels();
+
+                if (targetLevel === 4) {
+                    setTimeout(() => {
+                        window.location.href = FINAL_URL;
+                    }, 700);
+                    return;
+                }
+
+                setTimeout(() => {
+                    const nextBox = document.getElementById('level-' + (targetLevel + 1));
+                    if (nextBox) {
+                        nextBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+            } else {
+                alert("Esa clave no es correcta. ¡Fijate de haberla escrito bien! 🕵️‍♀️");
+            }
+        }
+
+        function reiniciarPrueba() {
+            localStorage.removeItem('caroLevel');
+            localStorage.removeItem('caroGlobalUnlock');
+
+            unlockedLevel = 0;
+            isGlobalUnlocked = false;
+
+            document.getElementById("clave-ingreso").value = '';
+            document.querySelectorAll('.key-input').forEach(input => input.value = '');
+
+            alert("¡Progreso reseteado!");
+            iniciarApp();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        iniciarApp();
+    </script>
+</body>
+</html>
